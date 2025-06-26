@@ -233,7 +233,7 @@ def main():
             """
             assistant_response = ask_openrouter(
                 context_prompt,
-                model="mistralai/mistral-7b-instruct",
+                model="mistralai/mistral-small-3.2-24b-instruct:free",
                 api_key=OPENROUTER_API_KEY,
                 max_tokens=max_tokens,
                 temperature=temperature
