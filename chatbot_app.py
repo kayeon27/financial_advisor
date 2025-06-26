@@ -52,53 +52,6 @@ st.markdown("""
     }
 </style>
 """, unsafe_allow_html=True)
-"""
-@st.cache_resource(show_spinner=True)
-def load_resources():
-    #Charge les ressources nécessaires (vecteur store, modèle, etc.)
-    try:
-        # Configuration du token
-        os.environ["HUGGINGFACEHUB_API_TOKEN"] = HF_TOKEN
-        
-        # Initialisation du modèle
-        llm = HFChatModel(
-            repo_id="HuggingFaceH4/zephyr-7b-beta", 
-            temperature=0.1, 
-            token=HF_TOKEN
-        )
-        
-        # Chargement des données historiques (pas utilisé dans notre cas, mais utile pour le contexte)
-        loader = FinancialDataLoader(RAW_CSV)
-        entries = loader.load()
-        docs = []
-        
-        for e in entries:
-            prompt = (f"I'm a {e['age']}-year-old {e['gender']} looking to invest in {e['Avenue']} "
-                      f"for {e['Purpose']} over the next {e['Duration']}.")
-            response = e.get('recommendation', 'No recommendation')
-            docs.append(Document(page_content=f"Prompt: {prompt}\nResponse: {response}"))
-        
-        # Découpage en chunks
-        splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
-        chunks = []
-        for d in docs:
-            for txt in splitter.split_text(d.page_content):
-                chunks.append(Document(page_content=txt))
-        
-        # Initialisation du vecteur store
-        embedder = get_embedder()
-        if os.path.exists(PERSIST_DIR):
-            store = load_vectorstore(embedder, PERSIST_DIR, COLLECTION)
-        else:
-            store = init_vectorstore(chunks, embedder, PERSIST_DIR, COLLECTION)
-        
-        retriever = store.as_retriever(search_kwargs={"k": 5})
-        
-        return llm, retriever
-        
-    except Exception as e:
-        st.error(f"Erreur lors du chargement des ressources: {str(e)}")
-        return None, None"""
 
 def display_chat_message(message, is_user=True):
     #Affiche un message dans le chat avec un style personnalisé
@@ -117,7 +70,7 @@ def display_chat_message(message, is_user=True):
         </div>
         """, unsafe_allow_html=True)
 
-def ask_openrouter(prompt, model="deepseek/deepseek-r1-0528-qwen3-8b:free", api_key=None, max_tokens=512, temperature=0.1):
+def ask_openrouter(prompt, model="google/gemma-3n-e4b-it:free", api_key=None, max_tokens=512, temperature=0.1):
     url = "https://openrouter.ai/api/v1/chat/completions"
     headers = {
         "Authorization": f"Bearer {api_key}",
@@ -173,14 +126,6 @@ def main():
     if 'reset_input' not in st.session_state:
         st.session_state.reset_input = False
     
-    """# Chargement des ressources
-    with st.spinner("Chargement du modèle et des données..."):
-        llm, retriever = load_resources()
-    
-    if llm is None or retriever is None:
-        st.error("❌ Impossible de charger les ressources. Vérifiez votre token Hugging Face.")
-        return"""
-    
     # Zone de chat
     st.subheader("💬 Conversation")
     
@@ -233,7 +178,7 @@ def main():
             """
             assistant_response = ask_openrouter(
                 context_prompt,
-                model="deepseek/deepseek-r1-0528-qwen3-8b:free",
+                model="google/gemma-3n-e4b-it:free",
                 api_key=OPENROUTER_API_KEY,
                 max_tokens=max_tokens,
                 temperature=temperature
