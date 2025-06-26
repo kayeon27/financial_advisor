@@ -117,7 +117,7 @@ def display_chat_message(message, is_user=True):
         </div>
         """, unsafe_allow_html=True)
 
-def ask_openrouter(prompt, model="mistralai/mistral-7b-instruct", api_key=None, max_tokens=512, temperature=0.1):
+def ask_openrouter(prompt, model="mistralai/mistral-small-3.2-24b-instruct:free", api_key=None, max_tokens=512, temperature=0.1):
     url = "https://openrouter.ai/api/v1/chat/completions"
     headers = {
         "Authorization": f"Bearer {api_key}",
